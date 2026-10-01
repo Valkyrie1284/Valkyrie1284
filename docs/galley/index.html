@@ -101,7 +101,7 @@ main.shell{padding-top:28px}.grid{display:grid;grid-template-columns:repeat(auto
       <div class="field"><label>类型</label><select id="fType"><option value="game">游戏</option><option value="film">电影</option><option value="series">剧集</option></select></div>
       <div class="field"><label>发行年份</label><input id="fYear" type="number" min="1880" max="2100"></div>
       <div class="field"><label>我的评分 / 10</label><input id="fRating" type="number" min="0" max="10" step="0.1"></div>
-      <div class="field"><label>Stayed with me / 5</label><input id="fStayed" type="number" min="0" max="5" step="1"></div>
+      <div class="field"><label>余韵 / 5</label><input id="fStayed" type="number" min="0" max="5" step="1"></div>
       <div class="field"><label>接触年份</label><input id="fExperienced" type="number" min="1900" max="2100"></div>
       <div class="field full"><label>标签（逗号分隔）</label><input id="fTags" placeholder="青春, 时间, 失去"></div>
       <div class="field full"><label>一句话</label><input id="fExcerpt" placeholder="它为什么值得留在这里？"></div>
@@ -159,7 +159,7 @@ function render(){
   $('#grid').innerHTML=list.length?list.map(x=>{
     const [c1,c2]=palette(x.title);
     const rating=Number(x.rating);
-    return '<article class="card" data-id="'+esc(x.id)+'"><div class="cover" style="--c1:'+c1+';--c2:'+c2+'"><div class="cover-title">'+esc(x.title)+'</div></div><div class="card-body"><div class="meta"><span>'+esc(typeName[x.type]||x.type)+' · '+(x.year||'—')+'</span><span>'+(rating?rating.toFixed(1)+'/10':'—')+'</span></div><h3>'+esc(x.title)+'</h3><div class="stars">'+('★'.repeat(x.stayed||0))+('☆'.repeat(5-(x.stayed||0)))+'</div><p class="excerpt">'+esc(x.excerpt||'还没有写下什么。')+'</p></div></article>';
+    return '<article class="card" data-id="'+esc(x.id)+'"><div class="cover" style="--c1:'+c1+';--c2:'+c2+'"><div class="cover-title">'+esc(x.title)+'</div></div><div class="card-body"><div class="meta"><span>'+esc(typeName[x.type]||x.type)+' · '+(x.year||'—')+'</span><span>'+(rating?rating.toFixed(1)+'/10':'—')+'</span></div><h3>'+esc(x.title)+'</h3><div class="stars">余韵 '+(x.stayed||0)+'/5</div><p class="excerpt">'+esc(x.excerpt||'还没有写下什么。')+'</p></div></article>';
   }).join(''):'<div class="empty"><strong>这里还是空的。</strong>从第一部你真正想留下来的作品开始。</div>';
   $$('.card').forEach(c=>c.onclick=()=>openDetail(c.dataset.id));
   $('#countAll').textContent=data.length;
@@ -172,7 +172,7 @@ function openDetail(id){
   selected=data.find(x=>x.id===id);if(!selected)return;
   $('#detailTitle').textContent=selected.title;
   $('#detailMeta').textContent=(typeName[selected.type]||selected.type)+' · '+(selected.year||'未知年份')+' · 我的评分 '+(selected.rating||'—')+'/10'+(selected.experienced?' · 接触于 '+selected.experienced:'');
-  $('#detailStayed').textContent='Stayed with me  '+'★'.repeat(selected.stayed||0)+'☆'.repeat(5-(selected.stayed||0));
+  $('#detailStayed').textContent='余韵 '+(selected.stayed||0)+'/5';
   $('#detailReview').textContent=selected.review||selected.excerpt||'还没有写。';
   $('#detailTags').innerHTML=(selected.tags||[]).map(t=>'<span class="tag">'+esc(t)+'</span>').join('')||'<span class="tag">暂无</span>';
   $('#detailModal').classList.add('show');
