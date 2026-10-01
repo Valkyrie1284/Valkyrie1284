@@ -128,8 +128,21 @@ const SEED_DATA=[
   {id:'cyberpunk-2077',title:'Cyberpunk 2077',type:'game',year:2020,rating:0,stayed:0,experienced:null,tags:[],excerpt:'',review:'',favorite:false}
 ];
 const savedData=localStorage.getItem(KEY);
-let data=savedData?JSON.parse(savedData):SEED_DATA.map(x=>({...x}));
-if(!savedData)localStorage.setItem(KEY,JSON.stringify(data));
+let data=[];
+try{
+  data=savedData?JSON.parse(savedData):[];
+  if(!Array.isArray(data)) data=[];
+}catch{
+  data=[];
+}
+let changed=false;
+for(const seed of SEED_DATA){
+  if(!data.some(item=>item.id===seed.id)){
+    data.push({...seed});
+    changed=true;
+  }
+}
+if(!savedData||changed)localStorage.setItem(KEY,JSON.stringify(data));
 let filter='all',selected=null,editing=null;
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const typeName={game:'游戏',film:'电影',series:'剧集'};
