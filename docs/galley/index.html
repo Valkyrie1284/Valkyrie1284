@@ -88,10 +88,10 @@ function render(){
  $('#grid').innerHTML=list.length?list.map(x=>{
    const [c1,c2]=palette(x.title),rating=Number(x.rating);
    const cover=x.cover?'<img src="'+x.cover+'" alt="">':'<div class="cover-title">'+esc(x.title)+'</div>';
-   return '<a class="card" href="./detail.html?id='+encodeURIComponent(x.id)+'"><div class="cover" style="--c1:'+c1+';--c2:'+c2+'">'+cover+'</div><div class="card-body"><div class="meta">'+esc(typeName[x.type]||x.type)+' · '+(x.year||'—')+'</div><h3>'+esc(x.title)+'</h3><div class="card-rating">'+(rating?rating.toFixed(1)+'/10':'未评分')+'</div></div></a>';
+   return '<a class="card" href="./detail.html?id='+encodeURIComponent(x.id)+'"><div class="cover" style="--c1:'+c1+';--c2:'+c2+'">'+cover+'</div><div class="card-body"><div class="meta">'+esc(typeName[x.type]||x.type)+' · '+(x.year||'—')+'</div><h3>'+esc(x.title)+'</h3><div class="card-rating">'+(rating?Math.round(rating)+'/10':'未评分')+'</div></div></a>';
  }).join(''):'<div class="empty"><strong>这里还是空的。</strong>添加第一部作品。</div>';
  $('#countAll').textContent=data.length;$('#countGame').textContent=data.filter(x=>x.type==='game').length;$('#countScreen').textContent=data.filter(x=>x.type==='film'||x.type==='series').length;
- const rs=data.map(x=>Number(x.rating)).filter(x=>x>0);$('#avgRating').textContent=rs.length?(rs.reduce((a,b)=>a+b,0)/rs.length).toFixed(1):'—';
+ const rs=data.map(x=>Number(x.rating)).filter(x=>x>0);$('#avgRating').textContent=rs.length?Math.round(rs.reduce((a,b)=>a+b,0)/rs.length):'—';
 }
 $$('.chip').forEach(b=>b.onclick=()=>{$$('.chip').forEach(x=>x.classList.remove('active'));b.classList.add('active');filter=b.dataset.filter;render()});$('#search').oninput=render;
 $('#exportBtn').onclick=()=>{const blob=new Blob([JSON.stringify({version:2,exportedAt:new Date().toISOString(),items:data},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='galley-backup.json';a.click();URL.revokeObjectURL(a.href)};
