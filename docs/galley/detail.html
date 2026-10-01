@@ -1,107 +1,42 @@
 <!doctype html>
 <html lang="zh-CN">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow,noarchive,nosnippet">
-<meta name="referrer" content="no-referrer">
 <title>Galley · Detail</title>
 <style>
-:root{--bg:#090a0d;--panel:#111319;--panel2:#171a21;--text:#f3f4f7;--muted:#969ca8;--line:#282c35;--accent:#c9b7ff;--danger:#ff9a9a;--shadow:0 24px 80px rgba(0,0,0,.34)}
-*{box-sizing:border-box}body{margin:0;min-height:100vh;color:var(--text);background:radial-gradient(circle at 12% -5%,#242039 0,transparent 28%),radial-gradient(circle at 88% 0,#18243a 0,transparent 22%),var(--bg);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-button,input,select,textarea{font:inherit}.shell{max-width:1180px;margin:auto;padding:26px}.nav{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:34px}.back{color:#d7d9df;text-decoration:none}.actions{display:flex;gap:9px}.btn{border:1px solid var(--line);background:#13161d;color:var(--text);border-radius:11px;padding:9px 13px;cursor:pointer;text-decoration:none}.btn:hover{background:#1b1f28}.btn.primary{background:#eee;color:#0b0c10;border-color:#eee;font-weight:750}.btn.danger{color:#ffb2b2;border-color:#553033;background:transparent}
-.hero{display:grid;grid-template-columns:minmax(240px,340px) 1fr;gap:48px;align-items:start}.cover-box{background:#05060a;border:1px solid var(--line);border-radius:22px;overflow:hidden;box-shadow:var(--shadow)}.cover-box img{width:100%;height:auto;display:block}.placeholder{aspect-ratio:2/3;display:flex;align-items:flex-end;padding:24px;background:linear-gradient(145deg,#3b4055,#191725);font-family:Georgia,"Times New Roman",serif;font-size:34px}
-.kicker{color:var(--accent);font-size:12px;letter-spacing:.16em;text-transform:uppercase;margin-top:8px}.title{font-family:Georgia,"Times New Roman",serif;font-size:clamp(44px,6vw,78px);font-weight:500;letter-spacing:-.045em;line-height:.98;margin:12px 0 20px}.meta{color:var(--muted);line-height:1.8}.overall{margin-top:28px;display:flex;align-items:flex-end;gap:12px}.overall .score{font-family:Georgia,"Times New Roman",serif;font-size:72px;line-height:.85}.overall .outof{color:var(--muted);font-size:16px;margin-bottom:7px}
-.section{margin-top:52px;padding-top:28px;border-top:1px solid var(--line)}.section h2{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:#b8bdc8;margin:0 0 20px}.scores{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.score-card{padding:18px;border:1px solid var(--line);background:rgba(17,19,25,.75);border-radius:15px}.score-head{display:flex;justify-content:space-between;gap:10px}.score-name{color:#d9dce3}.score-num{font-family:Georgia,"Times New Roman",serif;font-size:26px}.bar{height:5px;border-radius:999px;background:#252a34;overflow:hidden;margin-top:14px}.bar span{display:block;height:100%;background:linear-gradient(90deg,#8175b8,#d8d0ff);border-radius:inherit}
-.review{white-space:pre-wrap;font-size:17px;line-height:1.9;color:#d8dbe2;max-width:920px}.tags{display:flex;gap:8px;flex-wrap:wrap}.tag{border:1px solid var(--line);background:#171a21;border-radius:999px;padding:6px 9px;color:#c5c9d1;font-size:12px}
-.editor{display:none}.editor.show{display:block}.viewer.hide{display:none}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.field{display:flex;flex-direction:column;gap:7px}.field.full{grid-column:1/-1}.field label{color:var(--muted);font-size:12px}.field input,.field select,.field textarea{border:1px solid var(--line);background:#0b0d12;color:var(--text);border-radius:11px;padding:11px 12px}.field textarea{min-height:240px;resize:vertical}.dim-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.cover-preview{display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap}.cover-preview img{width:120px;height:auto;max-height:180px;object-fit:contain;background:#05060a;border-radius:10px;border:1px solid var(--line)}.footer-actions{display:flex;justify-content:space-between;gap:12px;margin-top:26px;padding-bottom:40px}
-@media(max-width:800px){.shell{padding:18px}.hero{grid-template-columns:1fr;gap:26px}.cover-box{max-width:330px}.scores,.dim-grid{grid-template-columns:1fr 1fr}.form-grid{grid-template-columns:1fr}.field.full{grid-column:auto}}
-@media(max-width:520px){.scores,.dim-grid{grid-template-columns:1fr}.title{font-size:46px}.overall .score{font-size:58px}}
+:root{--bg:#090a0d;--text:#f3f4f7;--muted:#969ca8;--line:#282c35;--accent:#c9b7ff}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;color:var(--text);background:radial-gradient(circle at 12% -5%,#242039 0,transparent 28%),radial-gradient(circle at 88% 0,#18243a 0,transparent 22%),var(--bg);font-family:Inter,system-ui,sans-serif}.shell{max-width:1180px;margin:auto;padding:26px}.nav{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:34px}.back{color:#d7d9df;text-decoration:none}.hero{display:grid;grid-template-columns:minmax(240px,340px) 1fr;gap:48px;align-items:start}.cover{background:#05060a;border:1px solid var(--line);border-radius:22px;overflow:hidden}.cover img{width:100%;height:auto;display:block}.placeholder{aspect-ratio:2/3;display:flex;align-items:flex-end;padding:24px;background:linear-gradient(145deg,#3b4055,#191725);font:34px Georgia,serif}.kicker{color:var(--accent);font-size:12px;letter-spacing:.16em;text-transform:uppercase;margin-top:8px}.title{font:500 clamp(44px,6vw,78px) Georgia,serif;letter-spacing:-.045em;line-height:.98;margin:12px 0 20px}.meta{color:var(--muted);line-height:1.8}.overall{margin-top:28px;display:flex;align-items:flex-end;gap:12px}.scorebig{font:72px Georgia,serif;line-height:.85}.outof{color:var(--muted);font-size:16px;margin-bottom:7px}.section{margin-top:52px;padding-top:28px;border-top:1px solid var(--line)}.section h2{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:#b8bdc8;margin:0 0 20px}.scores{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.score{padding:18px;border:1px solid var(--line);background:rgba(17,19,25,.75);border-radius:15px}.scorehead{display:flex;justify-content:space-between;gap:10px}.scorenum{font:26px Georgia,serif}.bar{height:5px;border-radius:999px;background:#252a34;overflow:hidden;margin-top:14px}.bar span{display:block;height:100%;background:linear-gradient(90deg,#8175b8,#d8d0ff)}.review{white-space:pre-wrap;font-size:17px;line-height:1.9;color:#d8dbe2;max-width:920px}.tags{display:flex;gap:8px;flex-wrap:wrap}.tag{border:1px solid var(--line);background:#171a21;border-radius:999px;padding:6px 9px;color:#c5c9d1;font-size:12px}.empty{border:1px dashed var(--line);border-radius:18px;padding:50px;text-align:center;color:var(--muted)}
+@media(max-width:800px){.shell{padding:18px}.hero{grid-template-columns:1fr;gap:26px}.cover{max-width:330px}.scores{grid-template-columns:1fr 1fr}}@media(max-width:520px){.scores{grid-template-columns:1fr}.title{font-size:46px}.scorebig{font-size:58px}}
 </style>
 </head>
 <body>
 <div class="shell">
-  <div class="nav"><a class="back" href="./">← 返回 Galley</a><div class="actions" id="viewActions"><button class="btn" id="editBtn">编辑</button></div></div>
-  <div class="viewer" id="viewer">
-    <section class="hero">
-      <div class="cover-box" id="coverBox"></div>
-      <div>
-        <div class="kicker" id="typeLabel"></div>
-        <h1 class="title" id="title"></h1>
-        <div class="meta" id="meta"></div>
-        <div class="overall"><div class="score" id="overallScore">—</div><div class="outof">/ 10</div></div>
-        <div class="tags" id="tags" style="margin-top:22px"></div>
-      </div>
-    </section>
-    <section class="section"><h2>分项评分</h2><div class="scores" id="scores"></div></section>
-    <section class="section"><h2>我的体验</h2><div class="review" id="review"></div></section>
-  </div>
-
-  <div class="editor" id="editor">
-    <h1 class="title" id="editorHeading" style="font-size:54px;margin-top:8px">编辑作品</h1>
-    <form id="form">
-      <div class="form-grid">
-        <div class="field"><label>标题</label><input id="fTitle" required></div>
-        <div class="field"><label>类型</label><select id="fType"><option value="game">游戏</option><option value="film">电影</option><option value="series">剧集</option></select></div>
-        <div class="field"><label>发行年份</label><input id="fYear" type="number" min="1880" max="2100"></div>
-        <div class="field"><label>整体评分 / 10</label><input id="fRating" type="number" min="0" max="10" step="0.1"></div>
-        <div class="field"><label>接触年份</label><input id="fExperienced" type="number" min="1900" max="2100"></div>
-        <div class="field"><label>最重要的作品</label><select id="fFavorite"><option value="false">否</option><option value="true">是</option></select></div>
-        <div class="field full"><label>封面图片</label><input id="fCover" type="file" accept="image/*"></div>
-        <div class="field full"><label>当前封面</label><div class="cover-preview"><img id="coverPreview" style="display:none"><div><div id="coverStatus" style="color:var(--muted);margin-bottom:10px">未设置</div><button class="btn" type="button" id="clearCover">清除封面</button></div></div></div>
-        <div class="field full"><label>标签（逗号分隔）</label><input id="fTags"></div>
-        <div class="field full"><label>一句话</label><input id="fExcerpt"></div>
-      </div>
-      <section class="section"><h2>分项评分</h2><div class="dim-grid" id="dimInputs"></div></section>
-      <section class="section"><h2>完整体验</h2><div class="field"><textarea id="fReview"></textarea></div></section>
-      <div class="footer-actions"><button class="btn danger" type="button" id="deleteBtn">删除作品</button><div class="actions"><button class="btn" type="button" id="cancelBtn">取消</button><button class="btn primary" type="submit">保存</button></div></div>
-    </form>
-  </div>
+  <div class="nav"><a class="back" href="./">← 返回 Galley</a></div>
+  <div id="content"><div class="empty">正在读取作品……</div></div>
 </div>
 <script>
-const KEY='galley_media_v1';
-const DELETED_KEY='galley_deleted_seed_ids_v1';
-const TYPE_NAME={game:'游戏',film:'电影',series:'剧集'};
-const DIMENSIONS={
+const API="https://mbqizwojhfwxpgkbayhr.supabase.co/functions/v1/galley-api";
+const TYPE={game:'游戏',film:'电影',series:'剧集'};
+const DIMS={
  game:[['story','剧情'],['gameplay','玩法'],['visuals','画面与美术'],['audio','音乐与音效'],['atmosphere','氛围与沉浸'],['performance','演出']],
  film:[['story','剧情'],['characters','角色'],['performance','表演'],['visuals','画面与摄影'],['audio','音乐与声音'],['pacing','节奏']],
  series:[['story','剧情'],['characters','角色'],['performance','表演'],['visuals','画面与摄影'],['audio','音乐与声音'],['pacing','节奏']]
 };
-const $=s=>document.querySelector(s);
-let data=[];try{data=JSON.parse(localStorage.getItem(KEY)||'[]');if(!Array.isArray(data))data=[]}catch{data=[]}
-const qs=new URLSearchParams(location.search),isNew=qs.get('new')==='1';let id=qs.get('id');let item=isNew?{id:null,title:'',type:'game',year:null,rating:0,experienced:null,tags:[],excerpt:'',review:'',favorite:false,scores:{},cover:null}:data.find(x=>x.id===id);
-let tempCover=item?.cover||null;
-if(!item){document.body.innerHTML='<div class="shell"><a class="back" href="./">← 返回 Galley</a><h1 style="margin-top:40px">找不到这条记录。</h1></div>';throw new Error('not found')}
-function esc(s=''){return String(s).replace(/[&<>'"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[m]))}
-function renderView(){
- document.title='Galley · '+item.title;$('#typeLabel').textContent=TYPE_NAME[item.type]||item.type;$('#title').textContent=item.title;
- $('#meta').textContent=(item.year||'未知年份')+(item.experienced?' · 接触于 '+item.experienced:'');
- $('#overallScore').textContent=Number(item.rating)>0?Number(item.rating).toFixed(1):'—';
- $('#coverBox').innerHTML=item.cover?'<img src="'+item.cover+'" alt="">':'<div class="placeholder">'+esc(item.title)+'</div>';
- $('#tags').innerHTML=(item.tags||[]).map(t=>'<span class="tag">'+esc(t)+'</span>').join('');
- const dims=DIMENSIONS[item.type]||DIMENSIONS.game,s=item.scores||{};
- $('#scores').innerHTML=dims.map(([k,label])=>{const v=Number(s[k]);return '<div class="score-card"><div class="score-head"><div class="score-name">'+label+'</div><div class="score-num">'+(v?v.toFixed(1):'—')+'</div></div><div class="bar"><span style="width:'+(v?Math.min(100,v*10):0)+'%"></span></div></div>'}).join('');
- $('#review').textContent=item.review||item.excerpt||'还没有写。';
+const esc=s=>String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+const id=new URLSearchParams(location.search).get('id');
+async function load(){
+  try{
+    const r=await fetch(API+'?action=get&id='+encodeURIComponent(id));
+    const j=await r.json();if(!r.ok)throw new Error(j.error||'读取失败');
+    const x=j.item,s=x.scores||{};
+    document.title='Galley · '+x.title;
+    const cover=x.cover?'<img src="'+x.cover+'" alt="">':'<div class="placeholder">'+esc(x.title)+'</div>';
+    const tags=(x.tags||[]).map(t=>'<span class="tag">'+esc(t)+'</span>').join('');
+    const scores=(DIMS[x.type]||DIMS.game).map(([k,l])=>{const v=Number(s[k]);return '<div class="score"><div class="scorehead"><div>'+l+'</div><div class="scorenum">'+(v?v.toFixed(1):'—')+'</div></div><div class="bar"><span style="width:'+(v?Math.min(100,v*10):0)+'%"></span></div></div>'}).join('');
+    document.querySelector('#content').innerHTML='<section class="hero"><div class="cover">'+cover+'</div><div><div class="kicker">'+(TYPE[x.type]||x.type)+'</div><h1 class="title">'+esc(x.title)+'</h1><div class="meta">'+(x.year||'未知年份')+(x.experienced?' · 接触于 '+x.experienced:'')+'</div><div class="overall"><div class="scorebig">'+(Number(x.rating)>0?Number(x.rating).toFixed(1):'—')+'</div><div class="outof">/ 10</div></div><div class="tags" style="margin-top:22px">'+tags+'</div></div></section><section class="section"><h2>分项评分</h2><div class="scores">'+scores+'</div></section><section class="section"><h2>我的体验</h2><div class="review">'+esc(x.review||'还没有写。')+'</div></section>';
+  }catch(e){document.querySelector('#content').innerHTML='<div class="empty">读取失败：'+esc(e.message)+'</div>'}
 }
-function renderDimInputs(type){
- const scores=item.scores||{};
- $('#dimInputs').innerHTML=(DIMENSIONS[type]||DIMENSIONS.game).map(([k,label])=>'<div class="field"><label>'+label+' / 10</label><input class="dim-score" data-key="'+k+'" type="number" min="0" max="10" step="0.1" value="'+(scores[k]??'')+'"></div>').join('');
-}
-function updatePreview(){if(tempCover){$('#coverPreview').src=tempCover;$('#coverPreview').style.display='block';$('#coverStatus').textContent='已设置'}else{$('#coverPreview').removeAttribute('src');$('#coverPreview').style.display='none';$('#coverStatus').textContent='未设置'}}
-function showEdit(){
- $('#viewer').classList.add('hide');$('#editor').classList.add('show');$('#viewActions').style.display='none';$('#editorHeading').textContent=isNew?'添加作品':'编辑作品';
- $('#fTitle').value=item.title||'';$('#fType').value=item.type||'game';$('#fYear').value=item.year||'';$('#fRating').value=item.rating||'';$('#fExperienced').value=item.experienced||'';$('#fFavorite').value=String(!!item.favorite);$('#fTags').value=(item.tags||[]).join(', ');$('#fExcerpt').value=item.excerpt||'';$('#fReview').value=item.review||'';tempCover=item.cover||null;updatePreview();renderDimInputs($('#fType').value);
- if(isNew)$('#deleteBtn').style.display='none';
-}
-function hideEdit(){if(isNew){location.href='./';return}$('#editor').classList.remove('show');$('#viewer').classList.remove('hide');$('#viewActions').style.display='flex'}
-function saveData(){try{localStorage.setItem(KEY,JSON.stringify(data))}catch(e){alert('浏览器存储空间不够了。可以先备份，或删除一些封面。');throw e}}
-function readCover(file){return new Promise((resolve,reject)=>{const img=new Image(),url=URL.createObjectURL(file);img.onload=()=>{try{const maxW=700,maxH=1050,scale=Math.min(1,maxW/img.width,maxH/img.height),w=Math.round(img.width*scale),h=Math.round(img.height*scale),canvas=document.createElement('canvas'),ctx=canvas.getContext('2d');canvas.width=w;canvas.height=h;ctx.drawImage(img,0,0,w,h);URL.revokeObjectURL(url);resolve(canvas.toDataURL('image/jpeg',.78))}catch(e){URL.revokeObjectURL(url);reject(e)}};img.onerror=()=>{URL.revokeObjectURL(url);reject(new Error('image'))};img.src=url})}
-$('#editBtn').onclick=showEdit;$('#cancelBtn').onclick=hideEdit;$('#fType').onchange=()=>renderDimInputs($('#fType').value);
-$('#fCover').onchange=async e=>{const file=e.target.files?.[0];if(!file)return;try{tempCover=await readCover(file);updatePreview()}catch{alert('封面读取失败，请换一张图片。')}};
-$('#clearCover').onclick=()=>{tempCover=null;$('#fCover').value='';updatePreview()};
-$('#deleteBtn').onclick=()=>{if(!isNew&&confirm('删除“'+item.title+'”？')){data=data.filter(x=>x.id!==item.id);try{let deletedIds=JSON.parse(localStorage.getItem(DELETED_KEY)||'[]');if(!Array.isArray(deletedIds))deletedIds=[];if(!deletedIds.includes(item.id)){deletedIds.push(item.id);localStorage.setItem(DELETED_KEY,JSON.stringify(deletedIds))}}catch{}saveData();location.href='./'}};
-$('#form').onsubmit=e=>{e.preventDefault();const scores={};document.querySelectorAll('.dim-score').forEach(inp=>{if(inp.value.trim()==='')return;const v=Number(inp.value);if(!Number.isNaN(v)&&v>=0&&v<=10)scores[inp.dataset.key]=v});const updated={...item,id:item.id||(crypto.randomUUID?crypto.randomUUID():String(Date.now())),title:$('#fTitle').value.trim(),type:$('#fType').value,year:Number($('#fYear').value)||null,rating:Number($('#fRating').value)||0,experienced:Number($('#fExperienced').value)||null,favorite:$('#fFavorite').value==='true',tags:$('#fTags').value.split(',').map(x=>x.trim()).filter(Boolean),excerpt:$('#fExcerpt').value.trim(),review:$('#fReview').value.trim(),cover:tempCover||null,scores};if(isNew){data.unshift(updated)}else{const i=data.findIndex(x=>x.id===item.id);data[i]=updated}saveData();location.href='./detail.html?id='+encodeURIComponent(updated.id)};
-if(isNew||qs.get('edit')==='1')showEdit();else renderView();
+load();
 </script>
-</body>
-</html>
+</body></html>
