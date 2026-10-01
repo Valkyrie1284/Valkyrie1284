@@ -86,7 +86,6 @@ main.shell{padding-top:28px}.grid{display:grid;grid-template-columns:repeat(auto
 <div class="modal" id="detailModal"><div class="dialog">
   <div class="dialog-head"><div><h3 id="detailTitle"></h3><div class="detail-meta" id="detailMeta"></div></div><button class="close" data-close="detailModal">×</button></div>
   <div class="dialog-body">
-    <div class="stars" id="detailStayed"></div>
     <div class="section-title">我的体验</div><div class="detail-review" id="detailReview"></div>
     <div class="section-title">标签</div><div class="tags" id="detailTags"></div>
   </div>
@@ -100,9 +99,10 @@ main.shell{padding-top:28px}.grid{display:grid;grid-template-columns:repeat(auto
       <div class="field"><label>标题</label><input id="fTitle" required></div>
       <div class="field"><label>类型</label><select id="fType"><option value="game">游戏</option><option value="film">电影</option><option value="series">剧集</option></select></div>
       <div class="field"><label>发行年份</label><input id="fYear" type="number" min="1880" max="2100"></div>
-      <div class="field"><label>我的评分 / 10</label><input id="fRating" type="number" min="0" max="10" step="0.1"></div>
-      <div class="field"><label>余韵 / 5</label><input id="fStayed" type="number" min="0" max="5" step="1"></div>
+      <div class="field"><label>整体评分 / 10</label><input id="fRating" type="number" min="0" max="10" step="0.1"></div>
       <div class="field"><label>接触年份</label><input id="fExperienced" type="number" min="1900" max="2100"></div>
+      <div class="field full"><label>封面图片</label><input id="fCoverFile" type="file" accept="image/*"></div>
+      <div class="field full"><label>当前封面</label><div style="display:flex;align-items:center;gap:12px"><img id="coverPreview" alt="" style="display:none;width:72px;height:96px;object-fit:cover;border-radius:8px;border:1px solid var(--line)"><span id="coverStatus" style="color:var(--muted);font-size:12px">未设置</span><button class="btn" id="clearCoverBtn" type="button">清除封面</button></div></div>
       <div class="field full"><label>标签（逗号分隔）</label><input id="fTags" placeholder="青春, 时间, 失去"></div>
       <div class="field full"><label>一句话</label><input id="fExcerpt" placeholder="它为什么值得留在这里？"></div>
       <div class="field full"><label>完整体验</label><textarea id="fReview" placeholder="写下真正记住的东西，不必像影评。"></textarea></div>
@@ -143,10 +143,10 @@ for(const seed of SEED_DATA){
   }
 }
 if(!savedData||changed)localStorage.setItem(KEY,JSON.stringify(data));
-let filter='all',selected=null,editing=null;
+let filter='all',selected=null,editing=null,tempCover=null;
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const typeName={game:'游戏',film:'电影',series:'剧集'};
-function save(){localStorage.setItem(KEY,JSON.stringify(data));}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(data));}catch(e){alert('浏览器存储空间不够了。可以先导出备份，或删除一些封面图片。');throw e;}}
 function esc(s=''){return String(s).replace(/[&<>'"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[m]));}
 function palette(seed){let h=0;for(const ch of seed)h=(h*31+ch.charCodeAt(0))%360;return ['hsl('+h+' 28% 34%)','hsl('+((h+65)%360)+' 28% 20%)'];}
 function render(){
@@ -159,7 +159,9 @@ function render(){
   $('#grid').innerHTML=list.length?list.map(x=>{
     const [c1,c2]=palette(x.title);
     const rating=Number(x.rating);
-    return '<article class="card" data-id="'+esc(x.id)+'"><div class="cover" style="--c1:'+c1+';--c2:'+c2+'"><div class="cover-title">'+esc(x.title)+'</div></div><div class="card-body"><div class="meta"><span>'+esc(typeName[x.type]||x.type)+' · '+(x.year||'—')+'</span><span>'+(rating?rating.toFixed(1)+'/10':'—')+'</span></div><h3>'+esc(x.title)+'</h3><div class="stars">余韵 '+(x.stayed||0)+'/5</div><p class="excerpt">'+esc(x.excerpt||'还没有写下什么。')+'</p></div></article>';
+    const coverStyle=x.cover?'background-image:linear-gradient(to top,rgba(0,0,0,.25),rgba(0,0,0,.03)),url('+JSON.stringify(x.cover)+');background-size:cover;background-position:center':'--c1:'+c1+';--c2:'+c2;
+    const coverLabel=x.cover?'':'<div class="cover-title">'+esc(x.title)+'</div>';
+    return '<article class="card" data-id="'+esc(x.id)+'"><div class="cover" style="'+coverStyle+'">'+coverLabel+'</div><div class="card-body"><div class="meta"><span>'+esc(typeName[x.type]||x.type)+' · '+(x.year||'—')+'</span><span>'+(rating?rating.toFixed(1)+'/10':'—')+'</span></div><h3>'+esc(x.title)+'</h3><p class="excerpt">'+esc(x.excerpt||'还没有写下什么。')+'</p></div></article>';
   }).join(''):'<div class="empty"><strong>这里还是空的。</strong>从第一部你真正想留下来的作品开始。</div>';
   $$('.card').forEach(c=>c.onclick=()=>openDetail(c.dataset.id));
   $('#countAll').textContent=data.length;
@@ -172,7 +174,6 @@ function openDetail(id){
   selected=data.find(x=>x.id===id);if(!selected)return;
   $('#detailTitle').textContent=selected.title;
   $('#detailMeta').textContent=(typeName[selected.type]||selected.type)+' · '+(selected.year||'未知年份')+' · 我的评分 '+(selected.rating||'—')+'/10'+(selected.experienced?' · 接触于 '+selected.experienced:'');
-  $('#detailStayed').textContent='余韵 '+(selected.stayed||0)+'/5';
   $('#detailReview').textContent=selected.review||selected.excerpt||'还没有写。';
   $('#detailTags').innerHTML=(selected.tags||[]).map(t=>'<span class="tag">'+esc(t)+'</span>').join('')||'<span class="tag">暂无</span>';
   $('#detailModal').classList.add('show');
@@ -180,9 +181,11 @@ function openDetail(id){
 function openForm(item=null){
   editing=item;$('#formTitle').textContent=item?'编辑作品':'添加作品';
   $('#fTitle').value=item?.title||'';$('#fType').value=item?.type||'game';$('#fYear').value=item?.year||'';
-  $('#fRating').value=item?.rating??'';$('#fStayed').value=item?.stayed??'';$('#fExperienced').value=item?.experienced||'';
+  $('#fRating').value=item?.rating??'';$('#fExperienced').value=item?.experienced||'';
   $('#fTags').value=(item?.tags||[]).join(', ');$('#fExcerpt').value=item?.excerpt||'';$('#fReview').value=item?.review||'';
-  $('#fFavorite').value=String(!!item?.favorite);$('#editModal').classList.add('show');
+  $('#fFavorite').value=String(!!item?.favorite);
+  $('#fCoverFile').value='';tempCover=item?.cover||null;updateCoverPreview();
+  $('#editModal').classList.add('show');
 }
 $$('[data-close]').forEach(b=>b.onclick=()=>$('#'+b.dataset.close).classList.remove('show'));
 $$('.modal').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('show')}));
@@ -190,12 +193,42 @@ $$('.chip').forEach(b=>b.onclick=()=>{$$('.chip').forEach(x=>x.classList.remove(
 $('#search').oninput=render;$('#addBtn').onclick=()=>openForm();
 $('#editBtn').onclick=()=>{if(selected){$('#detailModal').classList.remove('show');openForm(selected)}};
 $('#deleteBtn').onclick=()=>{if(selected&&confirm('删除“'+selected.title+'”？')){data=data.filter(x=>x.id!==selected.id);save();$('#detailModal').classList.remove('show');render()}};
+function updateCoverPreview(){
+  const img=$('#coverPreview'),status=$('#coverStatus');
+  if(tempCover){img.src=tempCover;img.style.display='block';status.textContent='已设置';}
+  else{img.removeAttribute('src');img.style.display='none';status.textContent='未设置';}
+}
+function compressCover(file){
+  return new Promise((resolve,reject)=>{
+    const img=new Image();
+    const url=URL.createObjectURL(file);
+    img.onload=()=>{
+      try{
+        const W=360,H=480,canvas=document.createElement('canvas'),ctx=canvas.getContext('2d');
+        canvas.width=W;canvas.height=H;
+        const scale=Math.max(W/img.width,H/img.height);
+        const dw=img.width*scale,dh=img.height*scale;
+        ctx.drawImage(img,(W-dw)/2,(H-dh)/2,dw,dh);
+        URL.revokeObjectURL(url);
+        resolve(canvas.toDataURL('image/jpeg',0.72));
+      }catch(err){URL.revokeObjectURL(url);reject(err);}
+    };
+    img.onerror=()=>{URL.revokeObjectURL(url);reject(new Error('image'));};
+    img.src=url;
+  });
+}
+$('#fCoverFile').onchange=async e=>{
+  const file=e.target.files?.[0];if(!file)return;
+  try{tempCover=await compressCover(file);updateCoverPreview();}
+  catch{alert('封面图片读取失败，请换一张图片。');}
+};
+$('#clearCoverBtn').onclick=()=>{tempCover=null;$('#fCoverFile').value='';updateCoverPreview();};
 $('#mediaForm').onsubmit=e=>{
   e.preventDefault();
   const item={
     id:editing?.id||(crypto.randomUUID?crypto.randomUUID():String(Date.now())),
     title:$('#fTitle').value.trim(),type:$('#fType').value,year:Number($('#fYear').value)||null,
-    rating:Number($('#fRating').value)||0,stayed:Number($('#fStayed').value)||0,experienced:Number($('#fExperienced').value)||null,
+    rating:Number($('#fRating').value)||0,cover:tempCover||null,experienced:Number($('#fExperienced').value)||null,
     tags:$('#fTags').value.split(',').map(x=>x.trim()).filter(Boolean),excerpt:$('#fExcerpt').value.trim(),
     review:$('#fReview').value.trim(),favorite:$('#fFavorite').value==='true'
   };
