@@ -159,7 +159,7 @@ function render(){
   $('#grid').innerHTML=list.length?list.map(x=>{
     const [c1,c2]=palette(x.title);
     const rating=Number(x.rating);
-    const coverStyle=x.cover?'background-image:linear-gradient(to top,rgba(0,0,0,.25),rgba(0,0,0,.03)),url('+JSON.stringify(x.cover)+');background-size:cover;background-position:center':'--c1:'+c1+';--c2:'+c2;
+    const coverStyle=x.cover?"background-image:linear-gradient(to top,rgba(0,0,0,.18),rgba(0,0,0,.02)),url('"+x.cover+"');background-size:cover;background-position:center":"--c1:"+c1+";--c2:"+c2;
     const coverLabel=x.cover?'':'<div class="cover-title">'+esc(x.title)+'</div>';
     return '<article class="card" data-id="'+esc(x.id)+'"><div class="cover" style="'+coverStyle+'">'+coverLabel+'</div><div class="card-body"><div class="meta"><span>'+esc(typeName[x.type]||x.type)+' · '+(x.year||'—')+'</span></div><h3>'+esc(x.title)+'</h3><div class="card-rating">'+(rating?rating.toFixed(1)+'/10':'未评分')+'</div></div></article>';
   }).join(''):'<div class="empty"><strong>这里还是空的。</strong>从第一部你真正想留下来的作品开始。</div>';
