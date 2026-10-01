@@ -44,7 +44,7 @@ button,input,select,textarea{font:inherit}.shell{max-width:1180px;margin:auto;pa
         <div class="field"><label>标题</label><input id="fTitle" required></div>
         <div class="field"><label>类型</label><select id="fType"><option value="game">游戏</option><option value="film">电影</option><option value="series">剧集</option></select></div>
         <div class="field"><label>发行年份</label><input id="fYear" type="number" min="1880" max="2100"></div>
-        <div class="field"><label>整体评分 / 10</label><input id="fRating" type="number" min="0" max="10" step="1" readonly><span id="ratingHint" style="color:var(--muted);font-size:11px">根据已填写的分项评分自动计算</span></div>
+        <div class="field"><label>整体评分 / 10</label><input id="fRating" type="number" min="0" max="10" step="0.1"></div>
         <div class="field"><label>接触年份</label><input id="fExperienced" type="number" min="1900" max="2100"></div>
         <div class="field"><label>最重要的作品</label><select id="fFavorite"><option value="false">否</option><option value="true">是</option></select></div>
         <div class="field full"><label>封面图片</label><input id="fCover" type="file" accept="image/*"></div>
@@ -75,36 +75,21 @@ function esc(s=''){return String(s).replace(/[&<>'"]/g,m=>({'&':'&amp;','<':'&lt
 function renderView(){
  document.title='Galley · '+item.title;$('#typeLabel').textContent=TYPE_NAME[item.type]||item.type;$('#title').textContent=item.title;
  $('#meta').textContent=(item.year||'未知年份')+(item.experienced?' · 接触于 '+item.experienced:'');
- $('#overallScore').textContent=Number(item.rating)>0?String(Math.round(Number(item.rating))):'—';
+ $('#overallScore').textContent=Number(item.rating)>0?Number(item.rating).toFixed(1):'—';
  $('#coverBox').innerHTML=item.cover?'<img src="'+item.cover+'" alt="">':'<div class="placeholder">'+esc(item.title)+'</div>';
  $('#tags').innerHTML=(item.tags||[]).map(t=>'<span class="tag">'+esc(t)+'</span>').join('');
  const dims=DIMENSIONS[item.type]||DIMENSIONS.game,s=item.scores||{};
  $('#scores').innerHTML=dims.map(([k,label])=>{const v=Number(s[k]);return '<div class="score-card"><div class="score-head"><div class="score-name">'+label+'</div><div class="score-num">'+(v?v.toFixed(1):'—')+'</div></div><div class="bar"><span style="width:'+(v?Math.min(100,v*10):0)+'%"></span></div></div>'}).join('');
  $('#review').textContent=item.review||item.excerpt||'还没有写。';
 }
-function calculateOverallFromInputs(){
- const vals=[...document.querySelectorAll('.dim-score')].map(inp=>inp.value.trim()===''?null:Number(inp.value)).filter(v=>v!==null&&!Number.isNaN(v)&&v>=0&&v<=10);
- if(vals.length){
-   const avg=vals.reduce((a,b)=>a+b,0)/vals.length;
-   const rounded=Math.round(avg);
-   $('#fRating').value=rounded;
-   $('#ratingHint').textContent='分项平均 '+avg.toFixed(2)+' → 整体评分 '+rounded+'/10';
-   return rounded;
- }
- $('#fRating').value=Number(item.rating)>0?Math.round(Number(item.rating)):'';
- $('#ratingHint').textContent='尚未填写分项评分；暂不重算整体评分';
- return Number(item.rating)||0;
-}
 function renderDimInputs(type){
  const scores=item.scores||{};
  $('#dimInputs').innerHTML=(DIMENSIONS[type]||DIMENSIONS.game).map(([k,label])=>'<div class="field"><label>'+label+' / 10</label><input class="dim-score" data-key="'+k+'" type="number" min="0" max="10" step="0.1" value="'+(scores[k]??'')+'"></div>').join('');
- document.querySelectorAll('.dim-score').forEach(inp=>inp.addEventListener('input',calculateOverallFromInputs));
- calculateOverallFromInputs();
 }
 function updatePreview(){if(tempCover){$('#coverPreview').src=tempCover;$('#coverPreview').style.display='block';$('#coverStatus').textContent='已设置'}else{$('#coverPreview').removeAttribute('src');$('#coverPreview').style.display='none';$('#coverStatus').textContent='未设置'}}
 function showEdit(){
  $('#viewer').classList.add('hide');$('#editor').classList.add('show');$('#viewActions').style.display='none';$('#editorHeading').textContent=isNew?'添加作品':'编辑作品';
- $('#fTitle').value=item.title||'';$('#fType').value=item.type||'game';$('#fYear').value=item.year||'';$('#fExperienced').value=item.experienced||'';$('#fFavorite').value=String(!!item.favorite);$('#fTags').value=(item.tags||[]).join(', ');$('#fExcerpt').value=item.excerpt||'';$('#fReview').value=item.review||'';tempCover=item.cover||null;updatePreview();renderDimInputs($('#fType').value);
+ $('#fTitle').value=item.title||'';$('#fType').value=item.type||'game';$('#fYear').value=item.year||'';$('#fRating').value=item.rating||'';$('#fExperienced').value=item.experienced||'';$('#fFavorite').value=String(!!item.favorite);$('#fTags').value=(item.tags||[]).join(', ');$('#fExcerpt').value=item.excerpt||'';$('#fReview').value=item.review||'';tempCover=item.cover||null;updatePreview();renderDimInputs($('#fType').value);
  if(isNew)$('#deleteBtn').style.display='none';
 }
 function hideEdit(){if(isNew){location.href='./';return}$('#editor').classList.remove('show');$('#viewer').classList.remove('hide');$('#viewActions').style.display='flex'}
@@ -114,7 +99,7 @@ $('#editBtn').onclick=showEdit;$('#cancelBtn').onclick=hideEdit;$('#fType').onch
 $('#fCover').onchange=async e=>{const file=e.target.files?.[0];if(!file)return;try{tempCover=await readCover(file);updatePreview()}catch{alert('封面读取失败，请换一张图片。')}};
 $('#clearCover').onclick=()=>{tempCover=null;$('#fCover').value='';updatePreview()};
 $('#deleteBtn').onclick=()=>{if(!isNew&&confirm('删除“'+item.title+'”？')){data=data.filter(x=>x.id!==item.id);saveData();location.href='./'}};
-$('#form').onsubmit=e=>{e.preventDefault();const scores={};document.querySelectorAll('.dim-score').forEach(inp=>{if(inp.value.trim()==='')return;const v=Number(inp.value);if(!Number.isNaN(v)&&v>=0&&v<=10)scores[inp.dataset.key]=v});const vals=Object.values(scores);const autoRating=vals.length?Math.round(vals.reduce((a,b)=>a+b,0)/vals.length):(Number(item.rating)||0);const updated={...item,id:item.id||(crypto.randomUUID?crypto.randomUUID():String(Date.now())),title:$('#fTitle').value.trim(),type:$('#fType').value,year:Number($('#fYear').value)||null,rating:autoRating,experienced:Number($('#fExperienced').value)||null,favorite:$('#fFavorite').value==='true',tags:$('#fTags').value.split(',').map(x=>x.trim()).filter(Boolean),excerpt:$('#fExcerpt').value.trim(),review:$('#fReview').value.trim(),cover:tempCover||null,scores};if(isNew){data.unshift(updated)}else{const i=data.findIndex(x=>x.id===item.id);data[i]=updated}saveData();location.href='./detail.html?id='+encodeURIComponent(updated.id)};
+$('#form').onsubmit=e=>{e.preventDefault();const scores={};document.querySelectorAll('.dim-score').forEach(inp=>{if(inp.value.trim()==='')return;const v=Number(inp.value);if(!Number.isNaN(v)&&v>=0&&v<=10)scores[inp.dataset.key]=v});const updated={...item,id:item.id||(crypto.randomUUID?crypto.randomUUID():String(Date.now())),title:$('#fTitle').value.trim(),type:$('#fType').value,year:Number($('#fYear').value)||null,rating:Number($('#fRating').value)||0,experienced:Number($('#fExperienced').value)||null,favorite:$('#fFavorite').value==='true',tags:$('#fTags').value.split(',').map(x=>x.trim()).filter(Boolean),excerpt:$('#fExcerpt').value.trim(),review:$('#fReview').value.trim(),cover:tempCover||null,scores};if(isNew){data.unshift(updated)}else{const i=data.findIndex(x=>x.id===item.id);data[i]=updated}saveData();location.href='./detail.html?id='+encodeURIComponent(updated.id)};
 if(isNew||qs.get('edit')==='1')showEdit();else renderView();
 </script>
 </body>
