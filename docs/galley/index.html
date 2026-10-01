@@ -75,8 +75,10 @@ const SEED_DATA=[
 {id:'beyond-two-souls',title:'Beyond: Two Souls',type:'game',year:2013,rating:0,experienced:null,tags:[],excerpt:'',review:'',favorite:false},
 {id:'cyberpunk-2077',title:'Cyberpunk 2077',type:'game',year:2020,rating:0,experienced:null,tags:[],excerpt:'',review:'',favorite:false}
 ];
+const DELETED_KEY='galley_deleted_seed_ids_v1';
 let data=[];try{data=JSON.parse(localStorage.getItem(KEY)||'[]');if(!Array.isArray(data))data=[]}catch{data=[]}
-let changed=false;for(const seed of SEED_DATA){if(!data.some(x=>x.id===seed.id)){data.push({...seed});changed=true}}
+let deletedIds=[];try{deletedIds=JSON.parse(localStorage.getItem(DELETED_KEY)||'[]');if(!Array.isArray(deletedIds))deletedIds=[]}catch{deletedIds=[]}
+let changed=false;for(const seed of SEED_DATA){if(!deletedIds.includes(seed.id)&&!data.some(x=>x.id===seed.id)){data.push({...seed});changed=true}}
 if(changed||!localStorage.getItem(KEY))localStorage.setItem(KEY,JSON.stringify(data));
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],typeName={game:'游戏',film:'电影',series:'剧集'};
 let filter='all';
