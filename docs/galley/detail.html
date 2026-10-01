@@ -31,7 +31,7 @@ async function load(){
     const j=await r.json();if(!r.ok)throw new Error(j.error||'读取失败');
     const x=j.item,s=x.scores||{};
     document.title='Galley · '+x.title;
-    const cover=x.cover?'<img src="'+x.cover+'" alt="">':'<div class="placeholder">'+esc(x.title)+'</div>';
+    const cover=x.cover?'<img src="'+esc(x.cover)+'" alt="">':'<div class="placeholder">'+esc(x.title)+'</div>';
     const tags=(x.tags||[]).map(t=>'<span class="tag">'+esc(t)+'</span>').join('');
     const scores=(DIMS[x.type]||DIMS.game).map(([k,l])=>{const v=Number(s[k]);return '<div class="score"><div class="scorehead"><div>'+l+'</div><div class="scorenum">'+(v?v.toFixed(1):'—')+'</div></div><div class="bar"><span style="width:'+(v?Math.min(100,v*10):0)+'%"></span></div></div>'}).join('');
     document.querySelector('#content').innerHTML='<section class="hero"><div class="cover">'+cover+'</div><div><div class="kicker">'+(TYPE[x.type]||x.type)+'</div><h1 class="title">'+esc(x.title)+'</h1><div class="meta">'+(x.year||'未知年份')+(x.experienced?' · 接触于 '+x.experienced:'')+'</div><div class="overall"><div class="scorebig">'+(Number(x.rating)>0?Number(x.rating).toFixed(1):'—')+'</div><div class="outof">/ 10</div></div><div class="tags" style="margin-top:22px">'+tags+'</div></div></section><section class="section"><h2>分项评分</h2><div class="scores">'+scores+'</div></section><section class="section"><h2>我的体验</h2><div class="review">'+esc(x.review||'还没有写。')+'</div></section>';

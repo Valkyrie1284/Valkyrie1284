@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow,noarchive,nosnippet"><title>Galley · 管理</title><style>
+:root{--bg:#090a0d;--panel:#111319;--text:#f3f4f7;--muted:#969ca8;--line:#282c35;--ok:#9ed8a8;--bad:#ffaaaa}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at 15% -10%,#242039 0,transparent 30%),var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif}
+.wrap{max-width:980px;margin:auto;padding:28px}a{color:#d8dbe3;text-decoration:none}.top{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.btn,button{display:inline-block;border:1px solid var(--line);background:#161922;color:var(--text);border-radius:10px;padding:10px 14px;cursor:pointer;text-decoration:none;font:inherit}.primary{background:#eee;color:#111;border-color:#eee;font-weight:700}.danger{color:#ffb2b2;border-color:#553033;background:transparent}
+h1{font:500 56px Georgia,serif;letter-spacing:-.04em;margin:35px 0 10px}h2{font-size:15px}.panel{margin:24px 0;border:1px solid var(--line);background:#111319;border-radius:18px;padding:21px}.field{display:flex;flex-direction:column;gap:6px;margin:11px 0}.field label,.muted{font-size:14px;color:var(--muted);line-height:1.6}
+input,select,textarea{width:100%;background:#0b0d12;color:var(--text);border:1px solid var(--line);border-radius:10px;padding:10px 11px;font:inherit}textarea{min-height:180px;resize:vertical}.row{display:flex;gap:10px;flex-wrap:wrap}.grow{flex:1;min-width:160px}.items{display:grid;gap:7px}.item{display:flex;justify-content:space-between;align-items:center;gap:12px;border-bottom:1px solid var(--line);padding:11px 0}.item:last-child{border-bottom:0}.ok{color:var(--ok)}.bad{color:var(--bad)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.scores{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+@media(max-width:700px){.wrap{padding:18px}.grid,.scores{grid-template-columns:1fr}.item{align-items:flex-start}}
+
+[hidden]{display:none!important}button:disabled{opacity:.55;cursor:wait}.status{white-space:pre-wrap;line-height:1.6}.item b{overflow-wrap:anywhere}body{font-size:16px}
+</style><script src="./admin.js" defer></script></head><body><main class="wrap">
+<div class="top"><a href="./">返回 Galley</a><button id="logout" hidden>退出登录</button></div><h1>Galley Admin</h1>
+<p id="status" class="status muted" role="status" aria-live="polite">正在连接云端……</p>
+<section id="auth" class="panel" hidden><h2 id="auth-title">管理员登录</h2>
+<p id="setup-note" class="muted" hidden>首次设置：填写原管理码，创建你自己的邮箱账号。以后使用邮箱和密码登录。</p>
+<form id="auth-form">
+<div class="field"><label for="email">邮箱</label><input id="email" type="email" autocomplete="username" required></div>
+<div class="field"><label for="password">密码</label><input id="password" type="password" autocomplete="current-password" required></div>
+<div id="code-field" class="field" hidden><label for="code">原管理码（仅首次设置需要）</label><input id="code" type="password" autocomplete="off"></div>
+<button id="login" class="primary" type="submit">登录</button>
+</form></section>
+<section id="dashboard" hidden>
+<div class="panel"><div class="row"><button id="new" class="primary">添加作品</button><button id="refresh">刷新作品</button><button id="export">导出云端备份</button></div><p id="account" class="muted"></p></div>
+<section class="panel"><h2>导入备份</h2><p class="muted">按作品 ID 合并，同名且 ID 不同的作品会保留。</p><form id="import-form"><div class="field"><input id="backup" type="file" accept=".json,application/json" required aria-label="备份文件"></div><button type="submit">导入 / 恢复</button></form></section>
+<section class="panel"><h2>批量添加</h2><form id="bulk-form"><div class="field"><label for="bulk-type">类型</label><select id="bulk-type"><option value="game">游戏</option><option value="film">电影</option><option value="series">剧集</option></select></div><div class="field"><label for="lines">一行一个：标题 | 发行年份 | 接触年份 | 评分</label><textarea id="lines" required></textarea></div><button type="submit" class="primary">批量加入云端</button></form></section>
+<section class="panel"><h2 id="count">作品</h2><div id="items" class="items"></div></section></section>
+<section id="editor" class="panel" hidden><h2 id="editor-title">编辑作品</h2><form id="edit-form">
+<div class="grid"><div class="field"><label for="title">标题</label><input id="title" required></div><div class="field"><label for="type">类型</label><select id="type"><option value="game">游戏</option><option value="film">电影</option><option value="series">剧集</option></select></div>
+<div class="field"><label for="year">发行年份</label><input id="year" type="number" min="1800" max="2200"></div><div class="field"><label for="experienced">接触年份</label><input id="experienced" type="number" min="1800" max="2200"></div>
+<div class="field"><label for="rating">整体评分 / 10</label><input id="rating" type="number" min="0" max="10" step=".1"></div><div class="field"><label for="favorite">最重要</label><select id="favorite"><option value="false">否</option><option value="true">是</option></select></div></div>
+<div class="field"><label for="tags">标签（逗号分隔）</label><input id="tags"></div><div class="field"><label for="excerpt">简短介绍</label><textarea id="excerpt"></textarea></div>
+<div class="field"><label for="cover">封面图片（不选则保留，最大 2 MB）</label><input id="cover" type="file" accept="image/jpeg,image/png,image/webp,image/gif"></div><label class="muted"><input id="clear-cover" type="checkbox" style="width:auto">清除当前封面</label>
+<h2>分项评分</h2><div id="scores" class="scores"></div><div class="field"><label for="review">完整体验</label><textarea id="review"></textarea></div>
+<div class="row"><button type="submit" class="primary">保存到云端</button><button id="cancel" type="button">取消</button><button id="delete" type="button" class="danger">删除作品</button></div></form></section>
+</main></body></html>

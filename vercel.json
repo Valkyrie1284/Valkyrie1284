@@ -1,21 +1,18 @@
 {
-  "rewrites": [
+  "redirects": [
     {
       "source": "/galley-admin",
-      "destination": "https://mbqizwojhfwxpgkbayhr.supabase.co/functions/v1/galley-admin"
+      "destination": "/docs/galley/admin.html",
+      "permanent": false
     }
   ],
   "headers": [
     {
-      "source": "/galley-admin",
+      "source": "/docs/galley/:path*",
       "headers": [
         {
-          "key": "Content-Type",
-          "value": "text/html; charset=utf-8"
-        },
-        {
           "key": "Cache-Control",
-          "value": "no-store"
+          "value": "no-cache"
         }
       ]
     }

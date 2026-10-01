@@ -15,7 +15,7 @@ button,input,select{font:inherit}.shell{max-width:1240px;margin:auto;padding:24p
 </style>
 </head>
 <body>
-<div class="shell"><header class="top"><div class="brand"><div class="sigil">G</div><div><h1>GALLEY</h1><small>personal media log</small></div></div><a class="btn" href="https://mbqizwojhfwxpgkbayhr.supabase.co/functions/v1/galley-admin">管理</a></header>
+<div class="shell"><header class="top"><div class="brand"><div class="sigil">G</div><div><h1>GALLEY</h1><small>personal media log</small></div></div><a class="btn" href="./admin.html">管理</a></header>
 <section class="hero"><h2>Galley</h2><p>我的游戏、电影和剧集记录。</p><div class="stats"><div class="stat"><b id="all">0</b><span>全部作品</span></div><div class="stat"><b id="games">0</b><span>游戏</span></div><div class="stat"><b id="screen">0</b><span>电影 / 剧集</span></div><div class="stat"><b id="avg">—</b><span>平均评分</span></div></div></section></div>
 <div class="toolbar"><div class="shell"><input id="q" class="search" placeholder="搜索……"><select id="sort" class="sort"><option value="experienced-desc">接触时间：新 → 旧</option><option value="experienced-asc">接触时间：旧 → 新</option><option value="name">名称 A → Z</option><option value="rating">评分：高 → 低</option></select><button class="chip active" data-f="all">全部</button><button class="chip" data-f="game">游戏</button><button class="chip" data-f="film">电影</button><button class="chip" data-f="series">剧集</button></div></div>
 <main class="shell"><div id="list"><div class="empty">正在读取 Galley…</div></div></main>
@@ -25,7 +25,7 @@ const TYPES={game:'游戏',film:'电影',series:'剧集'};
 let items=[],filter='all',sort='experienced-desc';
 const $=s=>document.querySelector(s);
 const esc=s=>String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-function card(x){return '<div class="card" data-id="'+esc(x.id)+'"><div class="cover">'+(x.cover?'<img src="'+x.cover+'">':'<div class="ph">'+esc(x.title)+'</div>')+'</div><div class="body"><div class="meta">'+(TYPES[x.type]||x.type)+' · '+(x.year||'—')+'</div><h3>'+esc(x.title)+'</h3><div class="rating">'+(Number(x.rating)?Number(x.rating).toFixed(1)+'/10':'未评分')+'</div></div></div>'}
+function card(x){return '<div class="card" data-id="'+esc(x.id)+'"><div class="cover">'+(x.cover?'<img src="'+esc(x.cover)+'">':'<div class="ph">'+esc(x.title)+'</div>')+'</div><div class="body"><div class="meta">'+(TYPES[x.type]||x.type)+' · '+(x.year||'—')+'</div><h3>'+esc(x.title)+'</h3><div class="rating">'+(Number(x.rating)?Number(x.rating).toFixed(1)+'/10':'未评分')+'</div></div></div>'}
 function render(){
  const q=$('#q').value.toLowerCase();let a=items.filter(x=>(filter==='all'||x.type===filter)&&(!q||[x.title,x.review,...(x.tags||[])].join(' ').toLowerCase().includes(q)));
  const ts=(x,y)=>x.title.localeCompare(y.title,undefined,{numeric:true,sensitivity:'base'});let out='';
@@ -35,6 +35,6 @@ function render(){
 }
 document.querySelectorAll('.chip').forEach(b=>b.onclick=()=>{document.querySelectorAll('.chip').forEach(x=>x.classList.remove('active'));b.classList.add('active');filter=b.dataset.f;render()});
 $('#q').oninput=render;$('#sort').onchange=e=>{sort=e.target.value;render()};
-fetch(API+'?action=list').then(r=>r.json()).then(j=>{items=j.items||[];$('#all').textContent=items.length;$('#games').textContent=items.filter(x=>x.type==='game').length;$('#screen').textContent=items.filter(x=>x.type!=='game').length;const rs=items.map(x=>Number(x.rating)).filter(Boolean);$('#avg').textContent=rs.length?(rs.reduce((a,b)=>a+b,0)/rs.length).toFixed(1):'—';render()}).catch(e=>{$('#list').innerHTML='<div class="empty">云端读取失败：'+esc(e.message)+'</div>'});
+fetch(API+'?action=list',{cache:'no-store'}).then(r=>r.json()).then(j=>{items=j.items||[];$('#all').textContent=items.length;$('#games').textContent=items.filter(x=>x.type==='game').length;$('#screen').textContent=items.filter(x=>x.type!=='game').length;const rs=items.map(x=>Number(x.rating)).filter(Boolean);$('#avg').textContent=rs.length?(rs.reduce((a,b)=>a+b,0)/rs.length).toFixed(1):'—';render()}).catch(e=>{$('#list').innerHTML='<div class="empty">云端读取失败：'+esc(e.message)+'</div>'});
 </script>
 </body></html>
