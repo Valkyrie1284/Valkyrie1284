@@ -1,0 +1,23 @@
+{
+  "rewrites": [
+    {
+      "source": "/galley-admin",
+      "destination": "https://mbqizwojhfwxpgkbayhr.supabase.co/functions/v1/galley-admin"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/galley-admin",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "text/html; charset=utf-8"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "no-store"
+        }
+      ]
+    }
+  ]
+}
