@@ -60,6 +60,7 @@ button,input,select,textarea{font:inherit}.shell{max-width:1180px;margin:auto;pa
 </div>
 <script>
 const KEY='galley_media_v1';
+const DELETED_KEY='galley_deleted_seed_ids_v1';
 const TYPE_NAME={game:'游戏',film:'电影',series:'剧集'};
 const DIMENSIONS={
  game:[['story','剧情'],['gameplay','玩法'],['visuals','画面与美术'],['audio','音乐与音效'],['atmosphere','氛围与沉浸'],['performance','演出']],
@@ -98,7 +99,7 @@ function readCover(file){return new Promise((resolve,reject)=>{const img=new Ima
 $('#editBtn').onclick=showEdit;$('#cancelBtn').onclick=hideEdit;$('#fType').onchange=()=>renderDimInputs($('#fType').value);
 $('#fCover').onchange=async e=>{const file=e.target.files?.[0];if(!file)return;try{tempCover=await readCover(file);updatePreview()}catch{alert('封面读取失败，请换一张图片。')}};
 $('#clearCover').onclick=()=>{tempCover=null;$('#fCover').value='';updatePreview()};
-$('#deleteBtn').onclick=()=>{if(!isNew&&confirm('删除“'+item.title+'”？')){data=data.filter(x=>x.id!==item.id);saveData();location.href='./'}};
+$('#deleteBtn').onclick=()=>{if(!isNew&&confirm('删除“'+item.title+'”？')){data=data.filter(x=>x.id!==item.id);try{let deletedIds=JSON.parse(localStorage.getItem(DELETED_KEY)||'[]');if(!Array.isArray(deletedIds))deletedIds=[];if(!deletedIds.includes(item.id)){deletedIds.push(item.id);localStorage.setItem(DELETED_KEY,JSON.stringify(deletedIds))}}catch{}saveData();location.href='./'}};
 $('#form').onsubmit=e=>{e.preventDefault();const scores={};document.querySelectorAll('.dim-score').forEach(inp=>{if(inp.value.trim()==='')return;const v=Number(inp.value);if(!Number.isNaN(v)&&v>=0&&v<=10)scores[inp.dataset.key]=v});const updated={...item,id:item.id||(crypto.randomUUID?crypto.randomUUID():String(Date.now())),title:$('#fTitle').value.trim(),type:$('#fType').value,year:Number($('#fYear').value)||null,rating:Number($('#fRating').value)||0,experienced:Number($('#fExperienced').value)||null,favorite:$('#fFavorite').value==='true',tags:$('#fTags').value.split(',').map(x=>x.trim()).filter(Boolean),excerpt:$('#fExcerpt').value.trim(),review:$('#fReview').value.trim(),cover:tempCover||null,scores};if(isNew){data.unshift(updated)}else{const i=data.findIndex(x=>x.id===item.id);data[i]=updated}saveData();location.href='./detail.html?id='+encodeURIComponent(updated.id)};
 if(isNew||qs.get('edit')==='1')showEdit();else renderView();
 </script>
