@@ -9,7 +9,7 @@
 <style>
 :root{--bg:#090a0d;--panel:#111319;--text:#f3f4f7;--muted:#969ca8;--line:#282c35;--accent:#c9b7ff;--shadow:0 24px 80px rgba(0,0,0,.34)}
 *{box-sizing:border-box}body{margin:0;min-height:100vh;color:var(--text);background:radial-gradient(circle at 18% -10%,#242039 0,transparent 30%),radial-gradient(circle at 88% 0,#18243a 0,transparent 25%),var(--bg);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-button,input{font:inherit}.shell{max-width:1240px;margin:auto;padding:24px}.top{display:flex;align-items:center;justify-content:space-between;gap:18px;padding-top:18px}
+button,input,select{font:inherit}.shell{max-width:1240px;margin:auto;padding:24px}.top{display:flex;align-items:center;justify-content:space-between;gap:18px;padding-top:18px}
 .brand{display:flex;gap:13px;align-items:center}.sigil{width:42px;height:42px;border:1px solid var(--line);border-radius:13px;display:grid;place-items:center;background:#11131a;font:700 20px/1 Georgia,serif}
 .brand h1{margin:0;font-size:17px;letter-spacing:.18em}.brand small{display:block;margin-top:4px;color:var(--muted)}
 .actions{display:flex;gap:9px;flex-wrap:wrap}.btn{border:1px solid var(--line);background:#13161d;color:var(--text);border-radius:11px;padding:9px 13px;cursor:pointer;text-decoration:none}.btn:hover{background:#1b1f28}.btn.primary{background:#eee;color:#0b0c10;border-color:#eee;font-weight:750}
@@ -18,14 +18,15 @@ button,input{font:inherit}.shell{max-width:1240px;margin:auto;padding:24px}.top{
 .toolbar{position:sticky;top:0;z-index:10;border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:rgba(9,10,13,.82);backdrop-filter:blur(16px)}
 .toolbar .shell{display:flex;gap:9px;align-items:center;padding-top:13px;padding-bottom:13px}.search{flex:1;min-width:220px;border:1px solid var(--line);background:#0f1117;color:var(--text);border-radius:11px;padding:10px 12px}
 .chip{border:1px solid var(--line);background:#101218;color:var(--muted);border-radius:999px;padding:8px 11px;cursor:pointer}.chip.active{background:#ececf0;color:#111;border-color:#ececf0}
-main.shell{padding-top:28px}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:22px}
+.sort-select{border:1px solid var(--line);background:#101218;color:#d7dbe3;border-radius:11px;padding:8px 30px 8px 11px;cursor:pointer}
+main.shell{padding-top:28px}.library{display:block}.year-group{margin-bottom:42px}.year-head{display:flex;align-items:baseline;gap:12px;margin:0 0 16px}.year-head h2{font-family:Georgia,"Times New Roman",serif;font-size:32px;font-weight:500;margin:0;letter-spacing:-.025em}.year-head span{font-size:12px;color:var(--muted)}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:22px}
 .card{display:block;color:inherit;text-decoration:none;border:1px solid var(--line);background:linear-gradient(180deg,#171a21,#101218);border-radius:19px;overflow:hidden;box-shadow:var(--shadow);transition:.22s ease}.card:hover{transform:translateY(-4px);border-color:#3f4653}
 .cover{aspect-ratio:2/3;display:flex;align-items:flex-end;position:relative;overflow:hidden;background:linear-gradient(145deg,var(--c1),var(--c2))}
 .cover img{width:100%;height:100%;object-fit:contain;background:#05060a;display:block}.cover-title{padding:18px;font-family:Georgia,"Times New Roman",serif;font-size:30px;line-height:1.02;letter-spacing:-.04em;text-shadow:0 2px 18px rgba(0,0,0,.35)}
 .card-body{padding:14px 15px 18px}.meta{font-size:11px;color:var(--muted)}.card h3{font-size:15px;margin:8px 0 14px}.card-rating{font-family:Georgia,"Times New Roman",serif;font-size:26px;line-height:1;color:var(--text);letter-spacing:-.02em}
 .empty{grid-column:1/-1;border:1px dashed var(--line);border-radius:18px;padding:55px 25px;text-align:center;color:var(--muted)}.empty strong{display:block;color:#dddfe5;font-size:17px;margin-bottom:7px}
 .file-input{display:none}.footer{color:#686e7b;font-size:11px;text-align:center;padding:48px 20px 30px}
-@media(max-width:680px){.shell{padding-left:17px;padding-right:17px}.top{align-items:flex-start}.hero{padding-top:45px}.hero h2{font-size:54px}.toolbar .shell{overflow:auto;flex-wrap:nowrap}.search{min-width:190px}.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.cover-title{font-size:23px}.card-body{padding:12px}.card-rating{font-size:23px}}
+@media(max-width:680px){.shell{padding-left:17px;padding-right:17px}.top{align-items:flex-start}.hero{padding-top:45px}.hero h2{font-size:54px}.toolbar .shell{overflow:auto;flex-wrap:nowrap}.search{min-width:190px}.sort-select{min-width:165px}.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.cover-title{font-size:23px}.card-body{padding:12px}.card-rating{font-size:23px}}
 </style>
 </head>
 <body>
@@ -52,13 +53,20 @@ main.shell{padding-top:28px}.grid{display:grid;grid-template-columns:repeat(auto
 </div>
 <div class="toolbar"><div class="shell">
   <input id="search" class="search" placeholder="搜索标题、标签或自己的文字……">
+  <select id="sortSelect" class="sort-select" aria-label="排序">
+    <option value="experienced-desc">接触时间：新 → 旧</option>
+    <option value="experienced-asc">接触时间：旧 → 新</option>
+    <option value="name">名称：A → Z</option>
+    <option value="rating">评分：高 → 低</option>
+    <option value="added">添加顺序</option>
+  </select>
   <button class="chip active" data-filter="all">全部</button>
   <button class="chip" data-filter="game">游戏</button>
   <button class="chip" data-filter="film">电影</button>
   <button class="chip" data-filter="series">剧集</button>
   <button class="chip" data-filter="favorite">最重要</button>
 </div></div>
-<main class="shell"><div id="grid" class="grid"></div></main>
+<main class="shell"><div id="grid" class="library"></div></main>
 <div class="footer">Galley</div>
 <script>
 const KEY='galley_media_v1';
@@ -81,21 +89,39 @@ let deletedIds=[];try{deletedIds=JSON.parse(localStorage.getItem(DELETED_KEY)||'
 let changed=false;for(const seed of SEED_DATA){if(!deletedIds.includes(seed.id)&&!data.some(x=>x.id===seed.id)){data.push({...seed});changed=true}}
 if(changed||!localStorage.getItem(KEY))localStorage.setItem(KEY,JSON.stringify(data));
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],typeName={game:'游戏',film:'电影',series:'剧集'};
-let filter='all';
+let filter='all',sortMode='experienced-desc';
 function esc(s=''){return String(s).replace(/[&<>'"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[m]))}
 function palette(seed){let h=0;for(const ch of seed)h=(h*31+ch.charCodeAt(0))%360;return ['hsl('+h+' 28% 34%)','hsl('+((h+65)%360)+' 28% 20%)']}
+function titleSort(a,b){return String(a.title||'').localeCompare(String(b.title||''),undefined,{sensitivity:'base',numeric:true})}
+function cardHtml(x){
+ const [c1,c2]=palette(x.title),rating=Number(x.rating);
+ const cover=x.cover?'<img src="'+x.cover+'" alt="">':'<div class="cover-title">'+esc(x.title)+'</div>';
+ return '<a class="card" href="./detail.html?id='+encodeURIComponent(x.id)+'"><div class="cover" style="--c1:'+c1+';--c2:'+c2+'">'+cover+'</div><div class="card-body"><div class="meta">'+esc(typeName[x.type]||x.type)+' · '+(x.year||'—')+'</div><h3>'+esc(x.title)+'</h3><div class="card-rating">'+(rating?rating.toFixed(1)+'/10':'未评分')+'</div></div></a>';
+}
 function render(){
  const q=$('#search').value.trim().toLowerCase();
- const list=data.filter(x=>{const ok=filter==='all'||x.type===filter||(filter==='favorite'&&x.favorite);const blob=[x.title,x.excerpt,x.review,(x.tags||[]).join(' ')].join(' ').toLowerCase();return ok&&(!q||blob.includes(q))});
- $('#grid').innerHTML=list.length?list.map(x=>{
-   const [c1,c2]=palette(x.title),rating=Number(x.rating);
-   const cover=x.cover?'<img src="'+x.cover+'" alt="">':'<div class="cover-title">'+esc(x.title)+'</div>';
-   return '<a class="card" href="./detail.html?id='+encodeURIComponent(x.id)+'"><div class="cover" style="--c1:'+c1+';--c2:'+c2+'">'+cover+'</div><div class="card-body"><div class="meta">'+esc(typeName[x.type]||x.type)+' · '+(x.year||'—')+'</div><h3>'+esc(x.title)+'</h3><div class="card-rating">'+(rating?rating.toFixed(1)+'/10':'未评分')+'</div></div></a>';
- }).join(''):'<div class="empty"><strong>这里还是空的。</strong>添加第一部作品。</div>';
+ let list=data.filter(x=>{const ok=filter==='all'||x.type===filter||(filter==='favorite'&&x.favorite);const blob=[x.title,x.excerpt,x.review,(x.tags||[]).join(' ')].join(' ').toLowerCase();return ok&&(!q||blob.includes(q))});
+ if(!list.length){
+   $('#grid').innerHTML='<div class="empty"><strong>这里还是空的。</strong>添加第一部作品。</div>';
+ }else if(sortMode==='experienced-desc'||sortMode==='experienced-asc'){
+   const years=[...new Set(list.map(x=>Number(x.experienced)||null).filter(Boolean))].sort((a,b)=>sortMode==='experienced-desc'?b-a:a-b);
+   const unknown=list.filter(x=>!Number(x.experienced)).sort(titleSort);
+   const groups=years.map(year=>{
+     const items=list.filter(x=>Number(x.experienced)===year).sort(titleSort);
+     return '<section class="year-group"><div class="year-head"><h2>'+year+'</h2><span>'+items.length+' 部作品</span></div><div class="grid">'+items.map(cardHtml).join('')+'</div></section>';
+   });
+   if(unknown.length)groups.push('<section class="year-group"><div class="year-head"><h2>未填写接触年份</h2><span>'+unknown.length+' 部作品</span></div><div class="grid">'+unknown.map(cardHtml).join('')+'</div></section>');
+   $('#grid').innerHTML=groups.join('');
+ }else{
+   if(sortMode==='name')list.sort(titleSort);
+   else if(sortMode==='rating')list.sort((a,b)=>(Number(b.rating)||-1)-(Number(a.rating)||-1)||titleSort(a,b));
+   // added keeps the stored array order
+   $('#grid').innerHTML='<div class="grid">'+list.map(cardHtml).join('')+'</div>';
+ }
  $('#countAll').textContent=data.length;$('#countGame').textContent=data.filter(x=>x.type==='game').length;$('#countScreen').textContent=data.filter(x=>x.type==='film'||x.type==='series').length;
  const rs=data.map(x=>Number(x.rating)).filter(x=>x>0);$('#avgRating').textContent=rs.length?(rs.reduce((a,b)=>a+b,0)/rs.length).toFixed(1):'—';
 }
-$$('.chip').forEach(b=>b.onclick=()=>{$$('.chip').forEach(x=>x.classList.remove('active'));b.classList.add('active');filter=b.dataset.filter;render()});$('#search').oninput=render;
+$('.chip').forEach(b=>b.onclick=()=>{$('.chip').forEach(x=>x.classList.remove('active'));b.classList.add('active');filter=b.dataset.filter;render()});$('#search').oninput=render;$('#sortSelect').onchange=e=>{sortMode=e.target.value;render()};
 $('#exportBtn').onclick=()=>{const blob=new Blob([JSON.stringify({version:2,exportedAt:new Date().toISOString(),items:data},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='galley-backup.json';a.click();URL.revokeObjectURL(a.href)};
 $('#importBtn').onclick=()=>$('#importFile').click();$('#importFile').onchange=async e=>{const file=e.target.files?.[0];if(!file)return;try{const p=JSON.parse(await file.text()),items=Array.isArray(p)?p:p.items;if(!Array.isArray(items))throw new Error();if(confirm('导入会替换当前 Galley 中的 '+data.length+' 条记录，继续吗？')){data=items;localStorage.setItem(KEY,JSON.stringify(data));render()}}catch{alert('这个文件不是有效的 Galley 备份。')}e.target.value=''};
 render();
