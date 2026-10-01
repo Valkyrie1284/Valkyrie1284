@@ -23,9 +23,7 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}.shell{max-width
 .brand{display:flex;gap:13px;align-items:center}.sigil{width:42px;height:42px;border:1px solid var(--line);border-radius:13px;display:grid;place-items:center;background:#11131a;font:700 20px/1 Georgia,serif}
 .brand h1{margin:0;font-size:17px;letter-spacing:.18em}.brand small{display:block;margin-top:4px;color:var(--muted)}
 .actions{display:flex;gap:9px;flex-wrap:wrap}.btn{border:1px solid var(--line);background:#13161d;color:var(--text);border-radius:11px;padding:9px 13px}.btn:hover{background:#1b1f28}.btn.primary{background:#eee;color:#0b0c10;border-color:#eee;font-weight:750}.btn.danger{color:#ffb2b2;border-color:#553033;background:transparent}
-.hero{padding:64px 0 36px}.eyebrow{text-transform:uppercase;letter-spacing:.2em;color:var(--accent);font-size:11px}.hero h2{font-family:Georgia,"Times New Roman",serif;font-size:clamp(48px,8vw,94px);font-weight:500;letter-spacing:-.055em;line-height:.94;margin:14px 0 18px;max-width:930px}.hero p{max-width:700px;color:#b2b6c0;font-size:17px;line-height:1.75}
-.notice{margin-top:25px;display:inline-flex;gap:9px;align-items:center;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:8px 11px;font-size:12px;background:rgba(17,19,25,.72)}
-.dot{width:7px;height:7px;border-radius:50%;background:#9bd5a5;box-shadow:0 0 12px #76be83}
+.hero{padding:58px 0 34px}.hero h2{font-family:Georgia,"Times New Roman",serif;font-size:clamp(42px,6vw,72px);font-weight:500;letter-spacing:-.04em;line-height:1;margin:0 0 14px;max-width:930px}.hero p{max-width:700px;color:#b2b6c0;font-size:16px;line-height:1.7;margin:0}
 .stats{display:flex;gap:28px;flex-wrap:wrap;margin-top:34px}.stat b{font-size:28px}.stat span{display:block;color:var(--muted);font-size:11px;margin-top:3px}
 .toolbar{position:sticky;top:0;z-index:10;border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:rgba(9,10,13,.82);backdrop-filter:blur(16px)}
 .toolbar .shell{display:flex;gap:9px;align-items:center;padding-top:13px;padding-bottom:13px}.search{flex:1;min-width:220px;border:1px solid var(--line);background:#0f1117;color:var(--text);border-radius:11px;padding:10px 12px}
@@ -60,10 +58,8 @@ main.shell{padding-top:28px}.grid{display:grid;grid-template-columns:repeat(auto
   </header>
 
   <section class="hero">
-    <div class="eyebrow">Games · Films · Series</div>
-    <h2>留下那些，我不想忘记的作品。</h2>
-    <p>不是排行榜，也不是给别人看的影评主页。这里只记录我玩过、看过，以及后来仍然留在我身上的东西。</p>
-    <div class="notice"><span class="dot"></span>你的条目只保存在当前浏览器，不会写进 GitHub，也不会上传到服务器。</div>
+    <h2>Galley</h2>
+    <p>我的游戏、电影和剧集记录。这里保存玩过、看过的作品，以及我自己的评分、评论和体验。</p>
     <div class="stats">
       <div class="stat"><b id="countAll">0</b><span>全部作品</span></div>
       <div class="stat"><b id="countGame">0</b><span>游戏</span></div>
@@ -118,7 +114,22 @@ main.shell{padding-top:28px}.grid{display:grid;grid-template-columns:repeat(auto
 
 <script>
 const KEY='galley_media_v1';
-let data=JSON.parse(localStorage.getItem(KEY)||'[]');
+const SEED_DATA=[
+  {id:'outlast',title:'Outlast',type:'game',year:2013,rating:0,stayed:0,experienced:null,tags:[],excerpt:'',review:'',favorite:false},
+  {id:'outlast-whistleblower',title:'Outlast: Whistleblower',type:'game',year:2014,rating:0,stayed:0,experienced:null,tags:[],excerpt:'',review:'',favorite:false},
+  {id:'outlast-2',title:'Outlast 2',type:'game',year:2017,rating:0,stayed:0,experienced:null,tags:[],excerpt:'',review:'',favorite:false},
+  {id:'outlast-trials',title:'The Outlast Trials',type:'game',year:2024,rating:0,stayed:0,experienced:null,tags:[],excerpt:'',review:'',favorite:false},
+  {id:'life-is-strange',title:'Life is Strange',type:'game',year:2015,rating:0,stayed:0,experienced:null,tags:[],excerpt:'',review:'',favorite:false},
+  {id:'twd-season-one',title:'The Walking Dead: Season One',type:'game',year:2012,rating:0,stayed:0,experienced:null,tags:[],excerpt:'',review:'',favorite:false},
+  {id:'twd-final-season',title:'The Walking Dead: The Final Season',type:'game',year:2018,rating:0,stayed:0,experienced:null,tags:[],excerpt:'',review:'',favorite:false},
+  {id:'a-space-for-the-unbound',title:'A Space for the Unbound',type:'game',year:2023,rating:0,stayed:0,experienced:null,tags:[],excerpt:'',review:'',favorite:false},
+  {id:'until-then',title:'Until Then',type:'game',year:2024,rating:0,stayed:0,experienced:null,tags:[],excerpt:'',review:'',favorite:false},
+  {id:'beyond-two-souls',title:'Beyond: Two Souls',type:'game',year:2013,rating:0,stayed:0,experienced:null,tags:[],excerpt:'',review:'',favorite:false},
+  {id:'cyberpunk-2077',title:'Cyberpunk 2077',type:'game',year:2020,rating:0,stayed:0,experienced:null,tags:[],excerpt:'',review:'',favorite:false}
+];
+const savedData=localStorage.getItem(KEY);
+let data=savedData?JSON.parse(savedData):SEED_DATA.map(x=>({...x}));
+if(!savedData)localStorage.setItem(KEY,JSON.stringify(data));
 let filter='all',selected=null,editing=null;
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const typeName={game:'游戏',film:'电影',series:'剧集'};
