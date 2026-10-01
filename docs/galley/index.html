@@ -121,7 +121,7 @@ function render(){
  $('#countAll').textContent=data.length;$('#countGame').textContent=data.filter(x=>x.type==='game').length;$('#countScreen').textContent=data.filter(x=>x.type==='film'||x.type==='series').length;
  const rs=data.map(x=>Number(x.rating)).filter(x=>x>0);$('#avgRating').textContent=rs.length?(rs.reduce((a,b)=>a+b,0)/rs.length).toFixed(1):'—';
 }
-$('.chip').forEach(b=>b.onclick=()=>{$('.chip').forEach(x=>x.classList.remove('active'));b.classList.add('active');filter=b.dataset.filter;render()});$('#search').oninput=render;$('#sortSelect').onchange=e=>{sortMode=e.target.value;render()};
+document.querySelectorAll('.chip').forEach(b=>b.onclick=()=>{document.querySelectorAll('.chip').forEach(x=>x.classList.remove('active'));b.classList.add('active');filter=b.dataset.filter;render()});$('#search').oninput=render;$('#sortSelect').onchange=e=>{sortMode=e.target.value;render()};
 $('#exportBtn').onclick=()=>{const blob=new Blob([JSON.stringify({version:2,exportedAt:new Date().toISOString(),items:data},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='galley-backup.json';a.click();URL.revokeObjectURL(a.href)};
 $('#importBtn').onclick=()=>$('#importFile').click();$('#importFile').onchange=async e=>{const file=e.target.files?.[0];if(!file)return;try{const p=JSON.parse(await file.text()),items=Array.isArray(p)?p:p.items;if(!Array.isArray(items))throw new Error();if(confirm('导入会替换当前 Galley 中的 '+data.length+' 条记录，继续吗？')){data=items;localStorage.setItem(KEY,JSON.stringify(data));render()}}catch{alert('这个文件不是有效的 Galley 备份。')}e.target.value=''};
 render();
