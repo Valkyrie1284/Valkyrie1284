@@ -5,10 +5,31 @@ const $ = id => document.getElementById(id);
 const TYPES = {game:'游戏',film:'电影',series:'剧集'};
 const DIMS = [['story','剧情'],['gameplay','玩法'],['visuals','画面与美术 / 摄影'],['audio','音乐与音效'],['atmosphere','氛围与沉浸'],['performance','演出 / 表演'],['characters','角色'],['pacing','节奏']];
 let session = null, setup = false, items = [], editing = null, refreshing = null;
+let filter = 'all', sort = 'experienced-desc', viewing = null;
+const VIEW_DIMS = {
+  game:[['story','剧情'],['gameplay','玩法'],['visuals','画面与美术'],['audio','音乐与音效'],['atmosphere','氛围与沉浸'],['performance','演出']],
+  film:[['story','剧情'],['characters','角色'],['performance','表演'],['visuals','画面与摄影'],['audio','音乐与声音'],['pacing','节奏']],
+  series:[['story','剧情'],['characters','角色'],['performance','表演'],['visuals','画面与摄影'],['audio','音乐与声音'],['pacing','节奏']]
+};
+const esc = value => String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+const scoreFields = {};
+function openDialog(id) { if (!$(id).open) $(id).showModal(); }
+function closeDialog(id) { if ($(id).open) $(id).close(); }
+function controls() {
+  for (const id of ['new','tools-open','logout']) $(id).hidden = !session;
+  $('login-open').hidden = !!session;
+  $('detail-edit').hidden = !session;
+}
 try { session = JSON.parse(sessionStorage.getItem(KEY)); } catch {}
 function message(text, bad = false) {
   $('status').textContent = text;
   $('status').className = 'status ' + (bad ? 'bad' : 'ok');
+  for (const id of ['auth','editor','tools']) {
+    if ($(id).open) {
+      $(id + '-status').textContent = text;
+      $(id + '-status').className = bad ? 'bad' : 'muted';
+    }
+  }
 }
 function remember(value) {
   session = value;
@@ -58,8 +79,10 @@ async function api(action, options = {}) {
 }
 function showAuth(initialSetup) {
   setup = initialSetup;
-  $('auth').hidden = false;
-  $('dashboard').hidden = $('editor').hidden = $('logout').hidden = true;
+  closeDialog('editor'); closeDialog('tools');
+  controls();
+  render();
+  openDialog('auth');
   $('code-field').hidden = $('setup-note').hidden = !setup;
   $('code').required = setup;
   $('password').minLength = setup ? 10 : 1;
@@ -74,38 +97,74 @@ async function run(button, task) {
   finally { if (button) button.disabled = false; }
 }
 async function dashboard() {
-  const data = await api('list', {method:'GET'});
+  const data = session ? await api('list', {method:'GET'}) : await request('list', {method:'GET'});
   items = data.items || [];
-  items.sort((a,b) => (b.experienced || 0) - (a.experienced || 0) || a.title.localeCompare(b.title));
-  $('items').replaceChildren();
-  $('count').textContent = '作品（' + items.length + '）';
-  for (const item of items) {
-    const row = document.createElement('div'); row.className = 'item';
-    const info = document.createElement('div');
-    const title = document.createElement('b'); title.textContent = item.title;
-    const meta = document.createElement('div'); meta.className = 'muted';
-    meta.textContent = (TYPES[item.type] || item.type) + ' · 接触 ' + (item.experienced || '—') + ' · ' + (Number(item.rating) || 0).toFixed(1) + '/10';
-    info.append(title, meta);
-    const button = document.createElement('button'); button.textContent = '编辑';
-    button.onclick = () => edit(item);
-    row.append(info, button); $('items').append(row);
+  controls();
+  render();
+  closeDialog('auth'); closeDialog('editor'); closeDialog('detail-dialog');
+  message(session ? '管理模式：点击卡片查看详情，或点击“编辑”。' : '');
+}
+function card(item) {
+  return '<article class="card"><button type="button" class="card-open" data-view="'+esc(item.id)+'" aria-label="查看 '+esc(item.title)+'"><div class="cover">'+(item.cover?'<img src="'+esc(item.cover)+'" alt="" loading="lazy">':'<div class="ph">'+esc(item.title)+'</div>')+'</div><div class="body"><div class="meta">'+esc(TYPES[item.type]||item.type)+' · '+esc(item.year||'—')+'</div><h3>'+esc(item.title)+'</h3><div class="rating">'+(Number(item.rating)?Number(item.rating).toFixed(1)+'/10':'未评分')+'</div></div></button>'+(session?'<button type="button" class="card-edit" data-edit="'+esc(item.id)+'" aria-label="编辑 '+esc(item.title)+'">编辑</button>':'')+'</article>';
+}
+function render() {
+  const q = $('q').value.toLowerCase();
+  const list = items.filter(x => (filter === 'all' || x.type === filter) && (!q || [x.title,x.review,...(x.tags||[])].join(' ').toLowerCase().includes(q)));
+  const byName = (a,b) => a.title.localeCompare(b.title,undefined,{numeric:true,sensitivity:'base'});
+  let html = '';
+  if (sort.startsWith('experienced')) {
+    const years = [...new Set(list.map(x => Number(x.experienced)||null).filter(Boolean))].sort((a,b) => sort === 'experienced-desc' ? b-a : a-b);
+    for (const year of years) html += '<section class="year"><h2>'+year+'</h2><div class="grid">'+list.filter(x=>Number(x.experienced)===year).sort(byName).map(card).join('')+'</div></section>';
+    const undated = list.filter(x=>!x.experienced).sort(byName);
+    if (undated.length) html += '<section class="year"><h2>未填写接触年份</h2><div class="grid">'+undated.map(card).join('')+'</div></section>';
+  } else {
+    list.sort(sort === 'rating' ? (a,b)=>(b.rating||0)-(a.rating||0)||byName(a,b) : byName);
+    html = '<div class="grid">'+list.map(card).join('')+'</div>';
   }
-  $('auth').hidden = $('editor').hidden = true;
-  $('dashboard').hidden = $('logout').hidden = false;
-  message('已连接云端。保存后的内容会在各设备刷新页面时显示。');
+  $('items').innerHTML = list.length ? html : '<div class="empty">'+(items.length?'没有找到匹配的作品。':'这里还没有云端作品。')+'</div>';
+  $('all').textContent = items.length;
+  $('games').textContent = items.filter(x=>x.type==='game').length;
+  $('screen').textContent = items.filter(x=>x.type!=='game').length;
+  const ratings = items.map(x=>Number(x.rating)).filter(Boolean);
+  $('avg').textContent = ratings.length ? (ratings.reduce((a,b)=>a+b,0)/ratings.length).toFixed(1) : '—';
+}
+function showDetail(item) {
+  viewing = item;
+  const scores = item.scores || {};
+  const cover = item.cover ? '<img src="'+esc(item.cover)+'" alt="">' : '<div class="placeholder">'+esc(item.title)+'</div>';
+  const dims = (VIEW_DIMS[item.type]||VIEW_DIMS.game).map(([key,label]) => {
+    const v = scores[key], n = Number(v), present = v !== undefined && v !== null && v !== '';
+    return '<div class="score"><div class="scorehead"><div>'+label+'</div><div class="scorenum">'+(present?n.toFixed(1):'—')+'</div></div><div class="bar"><span style="width:'+Math.min(100,Math.max(0,n*10||0))+'%"></span></div></div>';
+  }).join('');
+  $('detail-content').innerHTML = '<section class="hero"><div class="cover">'+cover+'</div><div><div class="kicker">'+esc(TYPES[item.type]||item.type)+'</div><h1 class="title">'+esc(item.title)+'</h1><div class="meta">'+esc(item.year||'未知年份')+(item.experienced?' · 接触于 '+esc(item.experienced):'')+'</div><div class="overall"><div class="scorebig">'+(Number(item.rating)>0?Number(item.rating).toFixed(1):'—')+'</div><div class="outof">/ 10</div></div><div class="tags" style="margin-top:22px">'+(item.tags||[]).map(x=>'<span class="tag">'+esc(x)+'</span>').join('')+'</div></div></section><section class="section"><h2>分项评分</h2><div class="scores">'+dims+'</div></section><section class="section"><h2>我的体验</h2><div class="review">'+esc(item.review||'还没有写。')+'</div></section>';
+  controls();
+  openDialog('detail-dialog');
 }
 function edit(item) {
+  if (!session) { showAuth(false); return; }
   editing = item || {id:crypto.randomUUID(), title:'', type:'game', tags:[], scores:{}, favorite:false};
   for (const key of ['title','type','year','experienced','rating','excerpt','review']) $(key).value = editing[key] ?? '';
   $('favorite').value = String(!!editing.favorite);
   $('tags').value = (editing.tags || []).join(', ');
   $('cover').value = ''; $('clear-cover').checked = false;
+  $('cover-preview').hidden = !editing.cover;
+  $('cover-preview').src = editing.cover || '';
   for (const [key] of DIMS) $('score-' + key).value = editing.scores?.[key] ?? '';
   $('editor-title').textContent = item ? '编辑作品' : '添加作品';
   $('delete').hidden = !item;
-  $('dashboard').hidden = true; $('editor').hidden = false;
+  closeDialog('detail-dialog');
+  $('editor-status').textContent = '';
+  updateDimensions();
+  openDialog('editor');
   message('编辑完成后，点击“保存到云端”。');
   $('title').focus();
+}
+function updateDimensions() {
+  const shown = new Map(VIEW_DIMS[$('type').value] || VIEW_DIMS.game);
+  for (const [key] of DIMS) {
+    scoreFields[key].hidden = !shown.has(key);
+    if (shown.has(key)) scoreFields[key].children[0].textContent = shown.get(key) + ' / 10';
+  }
 }
 function number(id) { return $(id).value.trim() === '' ? null : Number($(id).value); }
 function fileURL(file) {
@@ -145,6 +204,7 @@ for (const [key,label] of DIMS) {
   const input = document.createElement('input');
   Object.assign(input, {id:'score-' + key, type:'number', min:'0', max:'10', step:'.1'});
   field.append(text,input); $('scores').append(field);
+  scoreFields[key] = field;
 }
 $('auth-form').onsubmit = event => {
   event.preventDefault();
@@ -165,7 +225,7 @@ $('auth-form').onsubmit = event => {
 };
 $('edit-form').onsubmit = event => { event.preventDefault(); run(event.submitter, save); };
 $('new').onclick = () => edit(null);
-$('cancel').onclick = () => { $('editor').hidden = true; $('dashboard').hidden = false; message('未保存的修改已取消。'); };
+$('cancel').onclick = () => { closeDialog('editor'); message('未保存的修改已取消。'); };
 $('refresh').onclick = () => run($('refresh'), dashboard);
 $('delete').onclick = () => {
   if (!confirm('确定删除“' + editing.title + '”吗？')) return;
@@ -210,9 +270,30 @@ $('bulk-form').onsubmit = event => {
 };
 $('logout').onclick = () => run($('logout'), async () => {
   try { if(session) await request('logout',{token:session.access_token}); } catch {}
-  remember(null); showAuth(false); message('已退出登录。');
+  remember(null); closeDialog('tools'); closeDialog('detail-dialog'); controls(); render(); message('已退出登录。');
 });
+$('q').oninput = render;
+$('sort').onchange = event => { sort = event.target.value; render(); };
+document.querySelectorAll('[data-f]').forEach(button => button.onclick = () => {
+  document.querySelectorAll('[data-f]').forEach(x => x.classList.remove('active'));
+  button.classList.add('active'); filter = button.dataset.f; render();
+});
+$('items').onclick = event => {
+  const button = event.target.closest('[data-view],[data-edit]');
+  if (!button) return;
+  const item = items.find(x => x.id === (button.dataset.view || button.dataset.edit));
+  if (item) button.dataset.edit ? edit(item) : showDetail(item);
+};
+$('detail-edit').onclick = () => { if (viewing) edit(viewing); };
+$('detail-close').onclick = () => closeDialog('detail-dialog');
+$('editor-close').onclick = $('cancel').onclick;
+$('auth-close').onclick = () => closeDialog('auth');
+$('tools-close').onclick = () => closeDialog('tools');
+$('tools-open').onclick = () => { if (session) { $('tools-status').textContent = ''; openDialog('tools'); } };
+$('login-open').onclick = () => showAuth(setup);
+$('type').onchange = updateDimensions;
 async function boot() {
+  try { await dashboard(); } catch(e) { message(e.message,true); }
   if (session) {
     try {
       const result = await api('verify');
